@@ -1,0 +1,19 @@
+scenarios:                            # root of all scenarios
+#----------------------------------------------------------------------------
+  auto:                               # scenario "auto"
+    variables:
+      - none                          # variables with name "none" will be ignored
+
+    commands:                         # sequence of commands
+      - git add .
+      - git status                    # sign $$  
+#----------------------------------------------------------------------------
+  com-m:                              # scenario "param"
+    variables:
+      - message                       # first argument after scenario name will be
+                                      # assigned to the keyword $$message
+    commands:
+      - git add .
+      - git commit -m "$$message"     # keyword $$message will be replaced with assigned value
+      - git push origin master
+#----------------------------------------------------------------------------
