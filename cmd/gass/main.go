@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -18,20 +17,10 @@ func main() {
 		return
 	}
 
-	flag.Parse()
-
-	if *flagVersion {
-		fmt.Printf("Current version: %v\n", CURRENT_VERSION)
-	}
-
-	if *flagHelp {
-		fmt.Print(HELP_TEXT)
-	}
-
 	logger := log.New(os.Stdout, "gass:", log.Lshortfile)
 
-	if err := checkFile("gass.yaml"); err != nil {
-		logger.Fatal("missing file 'gass.yaml' with gass scenarios...", err.Error())
+	if !checkFile("gass.yaml") {
+		logger.Fatal("missing file 'gass.yaml' with gass scenarios...")
 	}
 
 	gassData := viper.New()
@@ -40,27 +29,32 @@ func main() {
 	gassData.AddConfigPath(".")
 	err := gassData.ReadInConfig()
 	if err != nil {
-		logger.Fatal("missing file 'gass.yaml' with gass scenarios...", err.Error())
+		logger.Fatal("Cannot read data from 'gass.yaml'...", err.Error())
 	}
 
-	var scLib gasscore.ScenarioLib = make(map[string]gasscore.Scenario, 0)
+	var scLib gasscore.ScenarioLib = make(map[string]*gasscore.Scenario, 0)
 	scMap := gassData.GetStringMap("scenarios")
-	for k := range scMap {
-		scVariables := gassData.GetStringSlice("scenarios." + k + ".variables")
-		scCommands := gassData.GetStringSlice("scenarios." + k + ".commands")
-		scen := gasscore.Scenario{
-			Name:      k,
+	for key := range scMap {
+		scVariables := gassData.GetStringSlice("scenarios." + key + ".variables")
+		scCommands := gassData.GetStringSlice("scenarios." + key + ".commands")
+		scen := &gasscore.Scenario{
+			Name:      key,
 			Variables: scVariables,
 			Commands:  scCommands,
 		}
-		scLib[k] = scen
+		scLib[key] = scen
 	}
 
-	fmt.Println(scLib)
+	Context, err := gasscore.NewContext(os.Args[1:], scLib)
 
+	if err != nil {
+		logger.Fatal("Initialization Error ", err.Error())
+	}
+
+	fmt.Println(Context)
 }
 
-func checkFile(fname string) error {
-	//TODO: check file existence; nil if it exists
-	return nil
+func checkFile(fname string) bool {
+	_, err := os.Stat(fname)
+	return err == nil || !os.IsNotExist(err)
 }

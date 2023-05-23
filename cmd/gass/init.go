@@ -1,12 +1,5 @@
 package main
 
-import "flag"
-
-var ( // Global variables
-	flagVersion = flag.Bool("version", false, "get current version of gass")
-	flagHelp    = flag.Bool("help", false, "get list of gass commands and options")
-)
-
 func init() {
 
 }
@@ -15,6 +8,9 @@ const CURRENT_VERSION = "0.0.1"
 
 const HELP_TEXT = `
 Usage of gass:
+
+>>gass [-options...?] [command?] [<scenario>?] [parameters...?]
+
 `
 
 const DISCLAIMER_TEXT = `
