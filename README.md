@@ -5,9 +5,9 @@ These scenarios can be adjusted and may have additional optiions (e.g. to set
 commit-messages or remote-branch names).
 
 To run scenario just execute gass with the scenario name.
->>gass <scenario-name>
+gass scenario-name
 
 Also, you can view list of options with help command
->>gass --help (or -h as shortcut)
+gass help
 
 
