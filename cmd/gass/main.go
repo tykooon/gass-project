@@ -17,7 +17,7 @@ func main() {
 		return
 	}
 
-	logger := log.New(os.Stdout, "gass:", log.Lshortfile)
+	logger := log.New(os.Stdout, "gass:", log.Ltime)
 
 	if !checkFile("gass.yaml") {
 		logger.Fatal("missing file 'gass.yaml' with gass scenarios...")
@@ -32,18 +32,7 @@ func main() {
 		logger.Fatal("Cannot read data from 'gass.yaml'...", err.Error())
 	}
 
-	var scLib gasscore.ScenarioLib = make(map[string]*gasscore.Scenario, 0)
-	scMap := gassData.GetStringMap("scenarios")
-	for key := range scMap {
-		scVariables := gassData.GetStringSlice("scenarios." + key + ".variables")
-		scCommands := gassData.GetStringSlice("scenarios." + key + ".commands")
-		scen := &gasscore.Scenario{
-			Name:      key,
-			Variables: scVariables,
-			Commands:  scCommands,
-		}
-		scLib[key] = scen
-	}
+	var scLib gasscore.ScenarioLib = readLibrary(gassData)
 
 	Context, err := gasscore.NewContext(os.Args[1:], scLib)
 
@@ -51,10 +40,29 @@ func main() {
 		logger.Fatal("Initialization Error ", err.Error())
 	}
 
-	fmt.Println(Context)
+	res, err := Context.Execute()
+	if err != nil {
+		logger.Fatal("Execution Error ", err.Error())
+	}
+	logger.Println(res)
+
+	logger.Println(Context)
 }
 
 func checkFile(fname string) bool {
 	_, err := os.Stat(fname)
 	return err == nil || !os.IsNotExist(err)
+}
+
+func readLibrary(data *viper.Viper) (lib map[string]*gasscore.Scenario) {
+	lib = make(map[string]*gasscore.Scenario)
+	scMap := data.GetStringMap("scenarios")
+	for key := range scMap {
+		scVariables := data.GetStringSlice("scenarios." + key + ".variables")
+		scCommands := data.GetStringSlice("scenarios." + key + ".commands")
+		lib[key] = gasscore.NewScenario(key)
+		lib[key].AddVariables(scVariables...)
+		lib[key].AddCommands(scCommands...)
+	}
+	return
 }

@@ -6,13 +6,6 @@ func init() {
 
 const CURRENT_VERSION = "0.0.1"
 
-const HELP_TEXT = `
-Usage of gass:
-
->>gass [-options...?] [command?] [<scenario>?] [parameters...?]
-
-`
-
 const DISCLAIMER_TEXT = `
 git assisant (gass) is simple tool for quick execution of short scenarios
 with git instuctions. All these scenarios can be found (and also edited)

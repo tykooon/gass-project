@@ -11,10 +11,10 @@ type GassContext struct {
 
 func NewContext(args []string, lib ScenarioLib) (*GassContext, error) {
 	result := &GassContext{
-		lib:      lib,
 		command:  "",
 		scenario: "",
 		params:   make([]string, 0),
+		lib:      lib,
 	}
 	offset := 0
 	if len(args) != 0 {
@@ -42,9 +42,13 @@ func NewContext(args []string, lib ScenarioLib) (*GassContext, error) {
 	return result, nil
 }
 
-func (ctx *GassContext) CommandExec() error {
+func (ctx *GassContext) CurrentScenario() *Scenario {
+	return ctx.lib[ctx.scenario]
+}
+
+func (ctx *GassContext) Execute() (string, error) {
 	if ctx.command == "" {
-		return ctx.lib[ctx.scenario].Run(ctx.params)
+		return ctx.CurrentScenario().Run(ctx.params)
 	}
-	return commands[ctx.command](ctx.lib[ctx.scenario].Name, ctx.params)
+	return commands[ctx.command](ctx)
 }
